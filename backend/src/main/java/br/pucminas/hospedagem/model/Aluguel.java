@@ -1,5 +1,6 @@
 package br.pucminas.hospedagem.model;
 
+import br.pucminas.hospedagem.exception.DataInvalidaException;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -59,10 +60,10 @@ public class Aluguel {
 
     public int calcularQuantidadeDiarias() {
         if (dataEntrada == null || dataSaida == null) {
-            throw new IllegalStateException("Datas de entrada e saida devem estar definidas");
+            throw new DataInvalidaException("Datas de entrada e saida devem estar definidas");
         }
         if (!dataSaida.isAfter(dataEntrada)) {
-            throw new IllegalStateException("Data de saida deve ser posterior a data de entrada");
+            throw new DataInvalidaException("Data de saida deve ser posterior a data de entrada");
         }
 
         long diasInteiros = ChronoUnit.DAYS.between(dataEntrada.toLocalDate(), dataSaida.toLocalDate());

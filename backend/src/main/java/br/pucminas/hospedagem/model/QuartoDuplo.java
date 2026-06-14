@@ -45,6 +45,11 @@ public class QuartoDuplo extends Quarto {
         return 2;
     }
 
+    @Override
+    public void solicitarBerco() {
+        this.possuiBerco = true;
+    }
+
     public TipoCamaCasal getTipoCama() {
         return tipoCama;
     }

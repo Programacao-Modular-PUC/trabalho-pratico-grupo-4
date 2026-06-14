@@ -1,5 +1,6 @@
 package br.pucminas.hospedagem.model;
 
+import br.pucminas.hospedagem.exception.CapacidadeExcedidaException;
 import jakarta.persistence.CollectionTable;
 import jakarta.persistence.DiscriminatorValue;
 import jakarta.persistence.ElementCollection;
@@ -44,7 +45,7 @@ public class QuartoFamilia extends Quarto {
             throw new IllegalArgumentException("Numero de hospedes deve ser maior que zero");
         }
         if (numeroHospedes > capacidadeMaxima()) {
-            throw new IllegalArgumentException(
+            throw new CapacidadeExcedidaException(
                     "Numero de hospedes (" + numeroHospedes + ") excede a capacidade do quarto (" + capacidadeMaxima() + ")");
         }
 

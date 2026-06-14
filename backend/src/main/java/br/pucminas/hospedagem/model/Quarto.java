@@ -1,5 +1,6 @@
 package br.pucminas.hospedagem.model;
 
+import br.pucminas.hospedagem.exception.RecursoNaoPermitidoException;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import jakarta.persistence.DiscriminatorColumn;
@@ -51,6 +52,14 @@ public abstract class Quarto {
 
     public double calcularDiariaParaHospedes(int numeroHospedes) {
         return calcularDiaria();
+    }
+
+    /**
+     * Solicita a inclusao de um berco no quarto. Por padrao nenhum tipo de quarto
+     * aceita berco; os tipos que permitem devem sobrescrever este metodo.
+     */
+    public void solicitarBerco() {
+        throw new RecursoNaoPermitidoException("Este tipo de quarto nao permite berco");
     }
 
     protected double adicionaisDeConforto() {
