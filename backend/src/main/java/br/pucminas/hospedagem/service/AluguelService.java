@@ -1,5 +1,8 @@
 package br.pucminas.hospedagem.service;
 
+import br.pucminas.hospedagem.exception.CapacidadeExcedidaException;
+import br.pucminas.hospedagem.exception.DataInvalidaException;
+import br.pucminas.hospedagem.exception.QuartoIndisponivelException;
 import br.pucminas.hospedagem.model.Aluguel;
 import br.pucminas.hospedagem.model.Cliente;
 import br.pucminas.hospedagem.model.Quarto;
@@ -43,6 +46,13 @@ public class AluguelService {
     public Aluguel criar(Long clienteId, Long quartoId, Long residenciaId,
                          LocalDateTime dataEntrada, LocalDateTime dataSaida, int numeroHospedes) {
 
+        if (dataEntrada == null || dataSaida == null) {
+            throw new DataInvalidaException("Datas de entrada e saida devem estar definidas");
+        }
+        if (!dataSaida.isAfter(dataEntrada)) {
+            throw new DataInvalidaException("Data de saida deve ser posterior a data de entrada");
+        }
+
         Cliente cliente = clienteRepository.findById(clienteId)
                 .orElseThrow(() -> new IllegalArgumentException("Cliente nao encontrado: " + clienteId));
         Quarto quarto = quartoRepository.findById(quartoId)
@@ -51,13 +61,13 @@ public class AluguelService {
                 .orElseThrow(() -> new IllegalArgumentException("Residencia nao encontrada: " + residenciaId));
 
         if (numeroHospedes > quarto.capacidadeMaxima()) {
-            throw new IllegalArgumentException(
+            throw new CapacidadeExcedidaException(
                     "Numero de hospedes (" + numeroHospedes + ") excede capacidade do quarto (" + quarto.capacidadeMaxima() + ")");
         }
 
         List<Aluguel> conflitos = aluguelRepository.findConflitos(quartoId, dataEntrada, dataSaida);
         if (!conflitos.isEmpty()) {
-            throw new IllegalStateException("Quarto indisponivel no periodo solicitado");
+            throw new QuartoIndisponivelException("Quarto indisponivel no periodo solicitado");
         }
 
         Aluguel aluguel = new Aluguel(dataEntrada, dataSaida, numeroHospedes, cliente, quarto, residencia);
@@ -65,8 +75,12 @@ public class AluguelService {
         return aluguelRepository.save(aluguel);
     }
 
-    public void cancelar(Long id) {
-        aluguelRepository.deleteById(id);
+    public boolean cancelar(Long id) {
+        if (aluguelRepository.existsById(id)) {
+            aluguelRepository.deleteById(id);
+            return true;
+        }
+        return false;
     }
 
     public String imprimirFormulario(Long id) {

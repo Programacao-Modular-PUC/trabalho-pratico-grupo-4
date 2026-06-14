@@ -13,7 +13,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
-import java.util.Map;
 
 @RestController
 @RequestMapping("/alugueis")
@@ -38,25 +37,23 @@ public class AluguelController {
     }
 
     @PostMapping
-    public ResponseEntity<?> criar(@RequestBody AluguelRequest request) {
-        try {
-            Aluguel aluguel = aluguelService.criar(
-                    request.getClienteId(),
-                    request.getQuartoId(),
-                    request.getResidenciaId(),
-                    request.getDataEntrada(),
-                    request.getDataSaida(),
-                    request.getNumeroHospedes());
-            return ResponseEntity.ok(aluguel);
-        } catch (IllegalArgumentException | IllegalStateException e) {
-            return ResponseEntity.badRequest().body(Map.of("erro", e.getMessage()));
-        }
+    public ResponseEntity<Aluguel> criar(@RequestBody AluguelRequest request) {
+        Aluguel aluguel = aluguelService.criar(
+                request.getClienteId(),
+                request.getQuartoId(),
+                request.getResidenciaId(),
+                request.getDataEntrada(),
+                request.getDataSaida(),
+                request.getNumeroHospedes());
+        return ResponseEntity.ok(aluguel);
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> cancelar(@PathVariable Long id) {
-        aluguelService.cancelar(id);
-        return ResponseEntity.noContent().build();
+        if (aluguelService.cancelar(id)) {
+            return ResponseEntity.noContent().build();
+        }
+        return ResponseEntity.notFound().build();
     }
 
     @GetMapping("/{id}/recibo")
