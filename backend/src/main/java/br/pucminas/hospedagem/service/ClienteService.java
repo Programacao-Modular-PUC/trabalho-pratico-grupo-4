@@ -1,6 +1,8 @@
 package br.pucminas.hospedagem.service;
 
+import br.pucminas.hospedagem.model.Aluguel;
 import br.pucminas.hospedagem.model.Cliente;
+import br.pucminas.hospedagem.repository.AluguelRepository;
 import br.pucminas.hospedagem.repository.ClienteRepository;
 import org.springframework.stereotype.Service;
 
@@ -11,9 +13,11 @@ import java.util.Optional;
 public class ClienteService {
 
     private final ClienteRepository clienteRepository;
+    private final AluguelRepository aluguelRepository;
 
-    public ClienteService(ClienteRepository clienteRepository) {
+    public ClienteService(ClienteRepository clienteRepository, AluguelRepository aluguelRepository) {
         this.clienteRepository = clienteRepository;
+        this.aluguelRepository = aluguelRepository;
     }
 
     public List<Cliente> listarTodos() {
@@ -32,6 +36,7 @@ public class ClienteService {
         if (clienteRepository.findByCpf(cliente.getCpf()).isPresent()) {
             throw new IllegalArgumentException("Já existe um cliente cadastrado com este CPF.");
         }
+
         return clienteRepository.save(cliente);
     }
 
@@ -42,6 +47,7 @@ public class ClienteService {
             clienteExistente.setEndereco(clienteAtualizado.getEndereco());
             clienteExistente.setTelefone(clienteAtualizado.getTelefone());
             clienteExistente.setEmail(clienteAtualizado.getEmail());
+
             return clienteRepository.save(clienteExistente);
         });
     }
@@ -51,6 +57,15 @@ public class ClienteService {
             clienteRepository.deleteById(id);
             return true;
         }
+
         return false;
+    }
+
+    public List<Aluguel> listarHistorico(Long id) {
+        if (!clienteRepository.existsById(id)) {
+            throw new IllegalArgumentException("Cliente nao encontrado: " + id);
+        }
+
+        return aluguelRepository.findByClienteId(id);
     }
 }
