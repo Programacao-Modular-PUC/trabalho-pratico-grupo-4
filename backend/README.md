@@ -178,7 +178,45 @@ POST /alugueis
 ### Calculo de diarias (Aluguel)
 - Numero de dias entre entrada e saida
 - Se saida apos 12h, soma +1 diaria
-- Valor final = `diariaCalculadaParaHospedes * quantidadeDiarias`
+- Valor final = `diariaComTarifa * quantidadeDiarias`
+
+## Tarifacao flexivel (Sprint 4)
+
+O valor da diaria passa por uma politica de tarifacao antes de compor o valor final.
+As politicas seguem o padrao **Strategy** (`PoliticaTarifa`) e a politica vigente e
+mantida pelo **Singleton** `GerenciadorTarifas` — a tarifa e um recurso global: todos
+os calculos do sistema (previsao de diaria e valor final do aluguel) precisam aplicar
+a mesma regra ao mesmo tempo.
+
+Politicas disponiveis:
+
+| Nome              | Ajuste                    |
+| ----------------- | ------------------------- |
+| `PADRAO`          | sem ajuste (padrao)       |
+| `ALTA_TEMPORADA`  | +30% na diaria            |
+| `BAIXA_TEMPORADA` | -20% na diaria            |
+| `PROMOCIONAL`     | -10% na diaria            |
+
+Novas regras (feriados, eventos, descontos especiais) sao adicionadas criando uma
+classe que implementa `PoliticaTarifa` e registrando-a no gerenciador, sem alterar
+o codigo existente.
+
+### Endpoints - `/tarifas`
+
+| Metodo | Path             | Descricao                                    |
+| ------ | ---------------- | -------------------------------------------- |
+| GET    | `/tarifas`       | Lista as politicas e mostra qual esta ativa  |
+| PUT    | `/tarifas/ativa` | Ativa uma politica (`?politica=NOME`)        |
+
+Exemplo:
+
+```bash
+# Ativa alta temporada
+curl -X PUT "http://localhost:8080/tarifas/ativa?politica=ALTA_TEMPORADA"
+
+# A partir daqui as diarias e novos alugueis usam +30%
+curl "http://localhost:8080/quartos/1/diaria"
+```
 
 ## Estrutura
 
@@ -199,5 +237,7 @@ src/main/java/br/pucminas/hospedagem/
 ├── repository/                    # Spring Data JPA
 ├── service/                       # Regras de negocio
 ├── controller/                    # Endpoints REST
-└── dto/                           # DTOs de request/response
+├── dto/                           # DTOs de request/response
+├── exception/                     # Excecoes personalizadas + handler global
+└── tarifa/                        # Strategy de tarifacao + Singleton GerenciadorTarifas
 ```
