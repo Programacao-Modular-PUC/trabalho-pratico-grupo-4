@@ -7,6 +7,7 @@ import br.pucminas.hospedagem.model.QuartoFamilia;
 import br.pucminas.hospedagem.model.QuartoIndividual;
 import br.pucminas.hospedagem.repository.AluguelRepository;
 import br.pucminas.hospedagem.repository.QuartoRepository;
+import br.pucminas.hospedagem.tarifa.GerenciadorTarifas;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -71,9 +72,9 @@ public class QuartoService {
     public double calcularDiariaPrevista(Long quartoId, Integer numeroHospedes) {
         Quarto quarto = quartoRepository.findById(quartoId)
                 .orElseThrow(() -> new IllegalArgumentException("Quarto nao encontrado: " + quartoId));
-        if (numeroHospedes == null || numeroHospedes <= 0) {
-            return quarto.calcularDiaria();
-        }
-        return quarto.calcularDiariaParaHospedes(numeroHospedes);
+        double valorDiaria = (numeroHospedes == null || numeroHospedes <= 0)
+                ? quarto.calcularDiaria()
+                : quarto.calcularDiariaParaHospedes(numeroHospedes);
+        return GerenciadorTarifas.getInstance().aplicarTarifa(valorDiaria);
     }
 }

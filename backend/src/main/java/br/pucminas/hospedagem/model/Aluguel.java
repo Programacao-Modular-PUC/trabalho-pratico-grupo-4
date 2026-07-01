@@ -1,6 +1,7 @@
 package br.pucminas.hospedagem.model;
 
 import br.pucminas.hospedagem.exception.DataInvalidaException;
+import br.pucminas.hospedagem.tarifa.GerenciadorTarifas;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -82,7 +83,8 @@ public class Aluguel {
         }
         this.quantidadeDiarias = calcularQuantidadeDiarias();
         double valorDiaria = quarto.calcularDiariaParaHospedes(numeroHospedes > 0 ? numeroHospedes : quarto.capacidadeMaxima());
-        this.valorFinal = valorDiaria * this.quantidadeDiarias;
+        double valorDiariaComTarifa = GerenciadorTarifas.getInstance().aplicarTarifa(valorDiaria);
+        this.valorFinal = valorDiariaComTarifa * this.quantidadeDiarias;
         return this.valorFinal;
     }
 
