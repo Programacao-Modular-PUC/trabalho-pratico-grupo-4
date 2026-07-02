@@ -1,5 +1,6 @@
 package br.pucminas.hospedagem.controller;
 
+import br.pucminas.hospedagem.model.Aluguel;
 import br.pucminas.hospedagem.model.Cliente;
 import br.pucminas.hospedagem.service.ClienteService;
 import org.springframework.http.HttpStatus;
@@ -35,6 +36,11 @@ public class ClienteController {
         return clienteService.buscarPorCpf(cpf)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
+    }
+
+    @GetMapping("/{id}/historico")
+    public ResponseEntity<List<Aluguel>> listarHistorico(@PathVariable Long id) {
+        return ResponseEntity.ok(clienteService.listarHistorico(id));
     }
 
     @PostMapping

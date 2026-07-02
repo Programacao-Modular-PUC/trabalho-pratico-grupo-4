@@ -130,6 +130,7 @@ POST /alugueis
 | ------ | ---------------- | ------------------------ |
 | GET    | `/clientes`      | Lista todos              |
 | GET    | `/clientes/{id}` | Busca por ID             |
+| GET    | `/clientes/{id}/historico` | Lista o historico de alugueis |
 | POST   | `/clientes`      | Cria um cliente          |
 | PUT    | `/clientes/{id}` | Atualiza um cliente      |
 | DELETE | `/clientes/{id}` | Remove um cliente        |
@@ -216,6 +217,31 @@ curl -X PUT "http://localhost:8080/tarifas/ativa?politica=ALTA_TEMPORADA"
 
 # A partir daqui as diarias e novos alugueis usam +30%
 curl "http://localhost:8080/quartos/1/diaria"
+```
+
+## Meios de pagamento (Sprint 4)
+
+Cada meio de pagamento possui uma Strategy responsável por suas regras de
+validação e processamento. A `ProcessadorPagamentoFactory` seleciona a Strategy
+correta para `DINHEIRO`, `CARTAO_CREDITO`, `CARTAO_DEBITO` ou `PIX`.
+
+### Endpoints - `/pagamentos`
+
+| Metodo | Path                      | Descricao                        |
+| ------ | ------------------------- | -------------------------------- |
+| POST   | `/pagamentos`             | Processa e confirma um pagamento |
+| GET    | `/pagamentos`             | Lista os pagamentos              |
+| GET    | `/pagamentos/{id}`        | Busca um pagamento por ID        |
+| GET    | `/pagamentos/{id}/recibo` | Emite o recibo em texto           |
+
+Exemplo:
+
+```bash
+curl -X POST "http://localhost:8080/pagamentos" \
+  -H "Content-Type: application/json" \
+  -d '{"aluguelId":1,"formaPagamento":"PIX"}'
+
+curl "http://localhost:8080/pagamentos/1/recibo"
 ```
 
 ## Estrutura
